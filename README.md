@@ -46,8 +46,7 @@ Normal Workload -> Increased Traffic -> Resource Pressure -> Horizontal Scaling 
 ## Architecture 
 The system consists of a small Spring Boot microservices application deployed to Amazon EKS. The application is intentionally kept simple so that the primary focus remains on cloud scalability, resilience, deployment automation, and observability. 
 
-
-// todo 
+<img width="384" height="631" alt="Screenshot 2026-09-22 at 13 09 57" src="https://github.com/user-attachments/assets/a4c6abae-518f-4de0-9b05-4e67ba733682" />
 
 ### Infrastructure and Application Boundaries 
 The project separates infrastructure provisioning from application deployment. 
@@ -60,7 +59,7 @@ The project separates infrastructure provisioning from application deployment.
 - IAM 
 - Networking 
 - Security 
-- Cloudwatch infrastructure
+- CloudWatch infrastructure
 
 ### Kubernetes and Helm manage application workloads: 
 - Deployments
