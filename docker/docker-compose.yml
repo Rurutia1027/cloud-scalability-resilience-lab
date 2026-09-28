@@ -1,0 +1,52 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: couponservice-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: servicedb
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ../couponservice/sql/tables.sql:/docker-entrypoint-initdb.d/01-tables.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  couponservice:
+    image: couponservice:local
+    pull_policy: never
+    container_name: couponservice
+    ports:
+      - "9091:9091"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/servicedb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ""
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  productservice:
+    image: productservice:local
+    pull_policy: never
+    container_name: productservice
+    ports:
+      - "9090:9090"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/servicedb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ""
+      COUPON_SERVICE_URL: http://couponservice:9091/couponapi/coupons/
+    depends_on:
+      mysql:
+        condition: service_healthy
+      couponservice:
+        condition: service_started
+
+volumes:
+  mysql-data:
