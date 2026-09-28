@@ -1,0 +1,43 @@
+name: ci
+
+on:
+  push:
+    paths:
+      - "couponservice/src/**"
+      - "couponservice/pom.xml"
+      - "couponservice/Dockerfile"
+      - "couponservice/.dockerignore"
+      - "productservice/src/**"
+      - "productservice/pom.xml"
+      - "productservice/Dockerfile"
+      - "productservice/.dockerignore"
+      - ".github/workflows/ci.yaml"
+
+jobs:
+  build:
+    name: build ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - couponservice
+          - productservice
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Package
+        working-directory: ${{ matrix.service }}
+        run: mvn -B -DskipTests package
+
+      - name: Build image
+        working-directory: ${{ matrix.service }}
+        run: docker build -t ${{ matrix.service }}:${{ github.sha }} .
