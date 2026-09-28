@@ -23,6 +23,16 @@ mvnw.cmd
 .terraform/
 *.tfstate
 *.tfstate.*
+.terraform.tfstate.lock.info
 crash.log
+crash.*.log
 override.tf
-*.auto.tfvars
+override.tf.json
+*_override.tf
+*_override.tf.json
+*.tfvars
+*.tfvars.json
+*.tfplan
+*tfplan*
+.terraformrc
+terraform.rc
