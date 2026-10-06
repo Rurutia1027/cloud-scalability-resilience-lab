@@ -1,0 +1,27 @@
+version: 0.2
+
+cache:
+  paths:
+    - /root/.m2/**/*
+
+phases:
+  pre_build:
+    commands:
+      - aws ecr get-login-password --region "$AWS_DEFAULT_REGION" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+  build:
+    commands:
+      - |
+        set -eu
+        java -version
+        mvn -version
+        IMAGE_TAG=$(echo "$CODEBUILD_RESOLVED_SOURCE_VERSION" | cut -c 1-7)
+        for service in couponservice productservice; do
+          case "$service" in
+            couponservice) repo="$ECR_COUPON_REPO" ;;
+            productservice) repo="$ECR_PRODUCT_REPO" ;;
+          esac
+          echo "Packaging ${service} as ${repo}:${IMAGE_TAG}"
+          ( cd "$service" && mvn -B -DskipTests package )
+          docker build -t "${repo}:${IMAGE_TAG}" "$service"
+          docker push "${repo}:${IMAGE_TAG}"
+        done
