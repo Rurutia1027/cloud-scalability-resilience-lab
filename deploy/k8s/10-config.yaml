@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app
+  namespace: csr-lab
+data:
+  # Replace the host with: terraform -chdir=../../tf-eks output -raw spring_datasource_url
+  SPRING_DATASOURCE_URL: jdbc:mysql://csr-lab-mysql.c70eww46ijse.eu-west-1.rds.amazonaws.com:3306/servicedb
+  #jdbc:mysql://csr-lab-mysql.REPLACE_ME.eu-west-1.rds.amazonaws.com:3306/servicedb
+  SPRING_DATASOURCE_USERNAME: labadmin
+
+  # Spring resolves the @Value("${couponService.url}") placeholder from COUPONSERVICE_URL.
+  # COUPON_SERVICE_URL does not bind to it, because the underscores would make it coupon.service.url.
+  COUPONSERVICE_URL: http://couponservice:9091/couponapi/coupons/
+---
+# The database password stays out of Git. Create the Secret from the shell once,
+# using the same value passed to Terraform as db_password:
+#
+#   kubectl create secret generic db -n csr-lab --from-literal=password='<db_password>'

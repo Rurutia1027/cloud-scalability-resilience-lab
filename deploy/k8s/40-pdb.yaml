@@ -1,0 +1,23 @@
+# While a Deployment sits at one replica these budgets block voluntary eviction
+# entirely. Raise the HPA minReplicas to 2 before the node-drain experiment.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: couponservice
+  namespace: csr-lab
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: couponservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: productservice
+  namespace: csr-lab
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: productservice
