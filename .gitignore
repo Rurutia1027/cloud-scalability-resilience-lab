@@ -19,6 +19,9 @@ mvnw.cmd
 # OS
 .DS_Store
 
+# Notes
+docs/
+
 # Terraform
 .terraform/
 *.tfstate
