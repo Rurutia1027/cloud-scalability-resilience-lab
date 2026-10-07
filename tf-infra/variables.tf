@@ -28,3 +28,9 @@ variable "github_branch" {
     type = string 
     default = "main"
 }
+
+variable "github_connection_arn" {
+    description = "Existing CodeConnections connection ARN. Leave empty to create a new pending connection. Set it in terraform.tfvars, which is gitignored."
+    type        = string
+    default     = ""
+}

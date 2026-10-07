@@ -1,7 +1,8 @@
 data "aws_caller_identity" "current" {}
 
 locals {
-  services = toset(["couponservice", "productservice"])
+  services              = toset(["couponservice", "productservice"])
+  github_connection_arn = var.github_connection_arn != "" ? var.github_connection_arn : aws_codestarconnections_connection.github[0].arn
 }
 
 resource "aws_ecr_repository" "service" {
@@ -102,6 +103,7 @@ resource "aws_cloudwatch_log_group" "codebuild" {
 }
 
 resource "aws_codestarconnections_connection" "github" {
+  count         = var.github_connection_arn == "" ? 1 : 0
   name          = "${var.name_prefix}-github"
   provider_type = "GitHub"
 }
@@ -263,7 +265,7 @@ data "aws_iam_policy_document" "codepipeline" {
   statement {
     sid       = "UseGitHubConnection"
     actions   = ["codestar-connections:UseConnection"]
-    resources = [aws_codestarconnections_connection.github.arn]
+    resources = [local.github_connection_arn]
   }
 }
 
@@ -324,7 +326,7 @@ resource "aws_codepipeline" "images" {
       output_artifacts = ["source"]
 
       configuration = {
-        ConnectionArn    = aws_codestarconnections_connection.github.arn
+        ConnectionArn    = local.github_connection_arn
         FullRepositoryId = "${var.github_owner}/${var.github_repo}"
         BranchName       = var.github_branch
         DetectChanges    = "false"

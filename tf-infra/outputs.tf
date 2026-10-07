@@ -9,8 +9,8 @@ output "pipeline_name" {
 }
 
 output "github_connection_arn" {
-  description = "Authorize this pending connection once in the AWS console before the first push."
-  value       = aws_codestarconnections_connection.github.arn
+  description = "CodeConnections GitHub connection ARN."
+  value       = local.github_connection_arn
 }
 
 output "github_connection_console_url" {
