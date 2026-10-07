@@ -1,0 +1,5 @@
+# Copy to terraform.tfvars, which .gitignore already excludes.
+db_password = "change-me-before-apply"
+
+# Off by default because the CloudWatch agent adds $1-$2 over a few hours.
+# enable_container_insights = true
