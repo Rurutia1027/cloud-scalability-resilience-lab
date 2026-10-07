@@ -5,7 +5,7 @@ variable "aws_region" {
 }
 
 variable "name_prefix" {
-  description = "Prefix shared with tf-infra, so cluster and repository names line up."
+  description = "Prefix shared with tf-cicd, so cluster and repository names line up."
   type        = string
   default     = "csr-lab"
 }
