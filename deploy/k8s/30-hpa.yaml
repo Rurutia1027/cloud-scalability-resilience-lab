@@ -16,15 +16,15 @@ spec:
         name: cpu
         target:
           type: Utilization
-          # 60% of the 100m request, so a replica is added at about 60m of real use.
-          averageUtilization: 60
+          # 10% of the 100m request, about 10m of CPU. A short k6 run crosses it.
+          averageUtilization: 10
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 0
       policies:
         - type: Pods
           value: 2
-          periodSeconds: 60
+          periodSeconds: 15
     scaleDown:
       stabilizationWindowSeconds: 120
 ---
@@ -46,13 +46,13 @@ spec:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 60
+          averageUtilization: 10
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 0
       policies:
         - type: Pods
           value: 2
-          periodSeconds: 60
+          periodSeconds: 15
     scaleDown:
       stabilizationWindowSeconds: 120

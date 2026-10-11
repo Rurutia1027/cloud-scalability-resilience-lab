@@ -4,9 +4,8 @@ metadata:
   name: app
   namespace: csr-lab
 data:
-  # Replace the host with: terraform -chdir=../../tf-eks output -raw spring_datasource_url
+  # terraform -chdir=tf-eks output -raw spring_datasource_url
   SPRING_DATASOURCE_URL: jdbc:mysql://csr-lab-mysql.c70eww46ijse.eu-west-1.rds.amazonaws.com:3306/servicedb
-  #jdbc:mysql://csr-lab-mysql.REPLACE_ME.eu-west-1.rds.amazonaws.com:3306/servicedb
   SPRING_DATASOURCE_USERNAME: labadmin
 
   # Spring resolves the @Value("${couponService.url}") placeholder from COUPONSERVICE_URL.

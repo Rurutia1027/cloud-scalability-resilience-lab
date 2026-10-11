@@ -83,7 +83,7 @@ variable "load_test_ingress_cidrs" {
 }
 
 variable "enable_container_insights" {
-  description = "Installs the CloudWatch agent for pod metrics. Adds $1-$2 over a few hours, so it is off by default."
+  description = "Installs the CloudWatch agent so the dashboard can list pods by service. Adds about $1-$2 over a few hours."
   type        = bool
-  default     = false
+  default     = true
 }
