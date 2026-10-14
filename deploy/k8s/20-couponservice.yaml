@@ -70,6 +70,8 @@ kind: Service
 metadata:
   name: couponservice
   namespace: csr-lab
+  labels:
+    app: couponservice
 spec:
   # Not published. Only productservice is reachable from outside the cluster.
   type: ClusterIP

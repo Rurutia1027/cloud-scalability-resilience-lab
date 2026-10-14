@@ -17,4 +17,11 @@ management:
   metrics:
     tags:
       application: couponservice
- 
+    # Histograms stay aggregatable across replicas. Client-side percentiles do not.
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        coupon.lookup.duration: true
+      slo:
+        http.server.requests: 50ms,100ms,200ms,500ms,1s
+

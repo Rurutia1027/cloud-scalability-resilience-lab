@@ -36,7 +36,7 @@ jobs:
 
       - name: Package
         working-directory: ${{ matrix.service }}
-        run: mvn -B -DskipTests package
+        run: mvn -B package
 
       - name: Build image
         working-directory: ${{ matrix.service }}

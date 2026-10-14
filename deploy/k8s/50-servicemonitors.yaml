@@ -1,0 +1,35 @@
+# Prometheus scrapes both services inside the cluster. The Service label matches
+# the selector below, and the release label matches the kube-prometheus-stack
+# chart. Coupon metrics stay on ClusterIP. Product metrics are scraped on the
+# cluster port, not through a public ingress.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: productservice
+  namespace: csr-lab
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: productservice
+  endpoints:
+    - port: http
+      path: /actuator/prometheus
+      interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: couponservice
+  namespace: csr-lab
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: couponservice
+  endpoints:
+    - port: http
+      path: /actuator/prometheus
+      interval: 15s
