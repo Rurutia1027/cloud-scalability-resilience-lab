@@ -13,11 +13,12 @@ spec:
   metrics:
     - type: Resource
       resource:
-        name: cpu
+        name: memory
         target:
           type: Utilization
-          # 10% of the 100m request, about 10m of CPU. A short k6 run crosses it.
-          averageUtilization: 10
+          # 100% of the 512Mi request. The local process sits near 480Mi after load,
+          # so a further rise in working set is what adds pods.
+          averageUtilization: 100
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 0
@@ -43,10 +44,12 @@ spec:
   metrics:
     - type: Resource
       resource:
-        name: cpu
+        name: memory
         target:
           type: Utilization
-          averageUtilization: 10
+          # 100% of the 512Mi request. The local process sits near 470Mi after load,
+          # so a further rise in working set is what adds pods.
+          averageUtilization: 100
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 0

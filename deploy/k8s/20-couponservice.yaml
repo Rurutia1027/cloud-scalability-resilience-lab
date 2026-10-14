@@ -42,10 +42,10 @@ spec:
           resources:
             requests:
               cpu: 100m
-              memory: 256Mi
+              memory: 512Mi
             limits:
               cpu: 500m
-              memory: 512Mi
+              memory: 768Mi
           # Spring Boot on a t3.small needs well over a minute of headroom before
           # liveness is allowed to start restarting the container.
           startupProbe:
