@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: productservice
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ["productservice:9090"]
+  - job_name: couponservice
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ["couponservice:9091"]

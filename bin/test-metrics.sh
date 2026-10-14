@@ -32,5 +32,13 @@ curl -sS http://localhost:9091/actuator/prometheus | grep '^process_cpu_usage'
 echo "" 
 curl -sS http://localhost:9091/actuator/prometheus | grep '^hikaricp_connections'
 
+echo ""
+echo "coupon lookup meters (present after a lookup)"
+curl -sS http://localhost:9091/actuator/prometheus | grep '^coupon_lookup_'
+
+echo ""
+echo "product business-path meters (present after POST /productapi/products)"
+curl -sS http://localhost:9090/actuator/prometheus | grep -E '^(coupon_client_|product_db_operation_duration_seconds_|product_operation_total)'
+
 
 

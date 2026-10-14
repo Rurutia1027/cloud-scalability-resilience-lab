@@ -40,10 +40,10 @@ spec:
           resources:
             requests:
               cpu: 100m
-              memory: 256Mi
+              memory: 512Mi
             limits:
               cpu: 500m
-              memory: 512Mi
+              memory: 768Mi
           startupProbe:
             httpGet:
               path: /actuator/health
@@ -66,6 +66,8 @@ kind: Service
 metadata:
   name: productservice
   namespace: csr-lab
+  labels:
+    app: productservice
 spec:
   # NodePort rather than LoadBalancer: k6 reaches a node's public IP directly and
   # the lab avoids a load balancer's hourly charge. tf-eks opens 30090 on the

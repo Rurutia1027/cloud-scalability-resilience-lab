@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: couponservice
   jpa:
     hibernate:
       ddl-auto: update
@@ -9,7 +11,16 @@ spring:
 server:
   port: 9091
 
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
 management:
+  tracing:
+    # Off until a collector is configured. Compose turns this on.
+    enabled: false
+    sampling:
+      probability: 1.0
   endpoints:
     web:
       exposure:
@@ -17,4 +28,11 @@ management:
   metrics:
     tags:
       application: couponservice
- 
+    # Histograms stay aggregatable across replicas. Client-side percentiles do not.
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        coupon.lookup.duration: true
+      slo:
+        http.server.requests: 50ms,100ms,200ms,500ms,1s
+
