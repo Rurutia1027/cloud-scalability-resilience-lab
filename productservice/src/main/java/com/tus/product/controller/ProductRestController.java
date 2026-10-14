@@ -37,7 +37,7 @@ public class ProductRestController {
 		RuntimeException failure = null;
 		try {
 			Coupon coupon = metrics.recordCouponClient(() -> restTemplate.getForObject(
-					couponServiceURL + product.getCouponCode(), Coupon.class));
+					couponServiceURL + "{code}", Coupon.class, product.getCouponCode()));
 			product.setPrice(product.getPrice().subtract(coupon.getDiscount()));
 			return metrics.recordDatabase("save", () -> repo.save(product));
 		} catch (RuntimeException ex) {

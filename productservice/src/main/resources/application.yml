@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: productservice
   jpa:
     hibernate:
       ddl-auto: update
@@ -9,7 +11,16 @@ spring:
 server:
   port: 9090
 
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
 management:
+  tracing:
+    # Off until a collector is configured. Compose turns this on.
+    enabled: false
+    sampling:
+      probability: 1.0
   endpoints:
     web:
       exposure:
