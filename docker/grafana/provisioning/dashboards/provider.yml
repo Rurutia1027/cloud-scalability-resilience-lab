@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: csr-lab
+    orgId: 1
+    folder: CSR lab
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards
