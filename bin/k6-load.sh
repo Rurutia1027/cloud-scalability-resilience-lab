@@ -1,7 +1,8 @@
 #!/bin/sh
-# Usage: bin/k6-load.sh http://<node-public-ip>:30090
+# Usage: bin/k6-load.sh http://<alb-dns-name>
+#        bin/k6-load.sh http://<node-public-ip>:30090
 if [ -z "$1" ]; then
-  echo "usage: bin/k6-load.sh http://63.34.7.142:30090" >&2
+  echo "usage: bin/k6-load.sh http://<alb-dns-name>" >&2
   exit 1
 fi
 
