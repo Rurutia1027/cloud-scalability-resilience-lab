@@ -47,7 +47,7 @@ spec:
         target:
           type: Utilization
           # 10% of the 512Mi request is about 51Mi. A warm JVM sits above that.
-          averageUtilization: 10
+          averageUtilization: 10 # average utilization is around 20% 
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 0

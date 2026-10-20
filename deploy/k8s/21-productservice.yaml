@@ -24,7 +24,7 @@ spec:
               app: productservice
       containers:
         - name: productservice
-          image: 943208837077.dkr.ecr.eu-west-1.amazonaws.com/csr-lab-productservice:3fec69c
+          image: 943208837077.dkr.ecr.eu-west-1.amazonaws.com/csr-lab-productservice:9ac5a51
           ports:
             - name: http
               containerPort: 9090
