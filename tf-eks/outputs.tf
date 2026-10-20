@@ -23,9 +23,24 @@ output "create_db_secret_command" {
   value       = "kubectl create secret generic db -n csr-lab --from-literal=password='<the db_password you passed to terraform>'"
 }
 
+output "aws_region" {
+  description = "Region the cluster and the ALB are created in."
+  value       = var.aws_region
+}
+
+output "alb_controller_role_arn" {
+  description = "IAM role the AWS Load Balancer Controller service account assumes."
+  value       = aws_iam_role.alb_controller.arn
+}
+
+output "product_alb_hostname_command" {
+  description = "Prints the ALB DNS name after the Ingress has an address."
+  value       = "kubectl get ingress productservice -n csr-lab -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'"
+}
+
 output "product_load_test_hint" {
-  description = "Where k6 points. Resolve a node address with the command below."
-  value       = "kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type==\"ExternalIP\")].address}' then http://<ip>:${var.product_node_port}/productapi/products"
+  description = "k6 against the ALB DNS name. The NodePort path remains for the before/after comparison."
+  value       = "bin/k6-load.sh http://$(kubectl get ingress productservice -n csr-lab -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
 }
 
 output "dashboard_url" {

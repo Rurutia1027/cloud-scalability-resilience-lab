@@ -69,9 +69,8 @@ metadata:
   labels:
     app: productservice
 spec:
-  # NodePort rather than LoadBalancer: k6 reaches a node's public IP directly and
-  # the lab avoids a load balancer's hourly charge. tf-eks opens 30090 on the
-  # cluster security group.
+  # Kept so a k6 run can still hit a node IP on 30090 and be compared with the
+  # ALB. New traffic uses the DNS name from deploy/k8s/22-ingress.yaml.
   type: NodePort
   selector:
     app: productservice

@@ -1,7 +1,11 @@
 // Drive productservice hard enough for the HPA to add pods.
 //
 // Coupons SAVE10 and SAVE20 must already be in the database. product looks
-// them up before it stores a row. On EKS the public address is a node IP:
+// them up before it stores a row. On EKS the public address is the ALB DNS name:
+//
+//   bin/k6-load.sh http://<alb-dns-name>
+//
+// The previous path, a node public IP, is still open for the comparison:
 //
 //   bin/k6-load.sh http://<node-public-ip>:30090
 //
