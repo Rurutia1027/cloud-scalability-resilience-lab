@@ -16,9 +16,8 @@ spec:
         name: memory
         target:
           type: Utilization
-          # 100% of the 512Mi request. The local process sits near 480Mi after load,
-          # so a further rise in working set is what adds pods.
-          averageUtilization: 100
+          # 30% of the 512Mi request is about 154Mi. A warm JVM sits above that.
+          averageUtilization: 30
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 0
@@ -47,9 +46,8 @@ spec:
         name: memory
         target:
           type: Utilization
-          # 100% of the 512Mi request. The local process sits near 470Mi after load,
-          # so a further rise in working set is what adds pods.
-          averageUtilization: 100
+          # 10% of the 512Mi request is about 51Mi. A warm JVM sits above that.
+          averageUtilization: 10
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 0
