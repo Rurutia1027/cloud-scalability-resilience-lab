@@ -8,11 +8,11 @@ data:
   SPRING_DATASOURCE_URL: jdbc:mysql://csr-lab-mysql.c70eww46ijse.eu-west-1.rds.amazonaws.com:3306/servicedb
   SPRING_DATASOURCE_USERNAME: labadmin
 
+  # Pointer only, the same role as {VAULT:key} in idm-service. Not the password.
+  # terraform -chdir=tf-eks output -raw db_master_user_secret_arn
+  DB_SECRET_ID: REPLACE_WITH_SECRET_ARN
+  AWS_REGION: eu-west-1
+
   # Spring resolves the @Value("${couponService.url}") placeholder from COUPONSERVICE_URL.
   # COUPON_SERVICE_URL does not bind to it, because the underscores would make it coupon.service.url.
   COUPONSERVICE_URL: http://couponservice:9091/couponapi/coupons/
----
-# The database password stays out of Git. RDS stores it in Secrets Manager.
-# After apply, copy it into this namespace without printing it:
-#
-#   terraform -chdir=tf-eks output -raw create_db_secret_command | bash

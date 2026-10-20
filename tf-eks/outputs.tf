@@ -19,13 +19,13 @@ output "spring_datasource_url" {
 }
 
 output "db_master_user_secret_arn" {
-  description = "Secrets Manager secret that holds the RDS master credentials. RDS creates it and encrypts it with the Secrets Manager KMS key."
+  description = "Secret id the pods read at startup. Put this in DB_SECRET_ID. It is not the password."
   value       = aws_db_instance.app.master_user_secret[0].secret_arn
 }
 
-output "create_db_secret_command" {
-  description = "Copy the password out of Secrets Manager into the Kubernetes Secret the Deployments already read. The password is not printed."
-  value       = "kubectl create secret generic db -n csr-lab --from-literal=password=\"$(aws secretsmanager get-secret-value --region ${var.aws_region} --secret-id ${aws_db_instance.app.master_user_secret[0].secret_arn} --query SecretString --output text | jq -r .password)\" --dry-run=client -o yaml | kubectl apply -f -"
+output "db_secret_role_arn" {
+  description = "IAM role annotated on the productservice and couponservice service accounts."
+  value       = aws_iam_role.db_secret.arn
 }
 
 output "product_load_test_hint" {
