@@ -11,6 +11,12 @@ data:
   # Spring resolves the @Value("${couponService.url}") placeholder from COUPONSERVICE_URL.
   # COUPON_SERVICE_URL does not bind to it, because the underscores would make it coupon.service.url.
   COUPONSERVICE_URL: http://couponservice:9091/couponapi/coupons/
+
+  # Off in application.yml. These turn tracing on and send spans to the
+  # collector installed by deploy/helm/observability. Export retries if that
+  # collector is not up yet; the process still starts.
+  MANAGEMENT_TRACING_ENABLED: "true"
+  MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-collector.observability.svc:4318/v1/traces
 ---
 # The database password stays out of Git. Create the Secret from the shell once,
 # using the same value passed to Terraform as db_password:

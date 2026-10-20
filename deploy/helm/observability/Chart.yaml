@@ -1,0 +1,16 @@
+apiVersion: v2
+name: observability
+description: Prometheus, Grafana, Tempo, and an OpenTelemetry collector for the lab services.
+type: application
+version: 0.1.0
+appVersion: "9ac5a51"
+dependencies:
+  - name: kube-prometheus-stack
+    version: 92.10.1
+    repository: https://prometheus-community.github.io/helm-charts
+  - name: tempo
+    version: 1.24.4
+    repository: https://grafana.github.io/helm-charts
+  - name: opentelemetry-collector
+    version: 0.176.0
+    repository: https://open-telemetry.github.io/opentelemetry-helm-charts
