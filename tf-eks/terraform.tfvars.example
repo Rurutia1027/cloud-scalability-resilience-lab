@@ -1,5 +1,7 @@
 # Copy to terraform.tfvars, which .gitignore already excludes.
-db_password = "change-me-before-apply"
+# The RDS master password is not set here. RDS generates it and stores it in
+# Secrets Manager. Remove db_password from an existing terraform.tfvars before
+# the next apply, or Terraform rejects it as an undeclared variable.
 
 # The pod panels need this agent. It adds about $1-$2 over a few hours.
 # enable_container_insights = false

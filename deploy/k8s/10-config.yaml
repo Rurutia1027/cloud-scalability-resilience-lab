@@ -12,7 +12,7 @@ data:
   # COUPON_SERVICE_URL does not bind to it, because the underscores would make it coupon.service.url.
   COUPONSERVICE_URL: http://couponservice:9091/couponapi/coupons/
 ---
-# The database password stays out of Git. Create the Secret from the shell once,
-# using the same value passed to Terraform as db_password:
+# The database password stays out of Git. RDS stores it in Secrets Manager.
+# After apply, copy it into this namespace without printing it:
 #
-#   kubectl create secret generic db -n csr-lab --from-literal=password='<db_password>'
+#   terraform -chdir=tf-eks output -raw create_db_secret_command | bash

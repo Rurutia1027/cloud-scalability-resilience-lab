@@ -18,9 +18,14 @@ output "spring_datasource_url" {
   value       = "jdbc:mysql://${aws_db_instance.app.endpoint}/${var.db_name}"
 }
 
+output "db_master_user_secret_arn" {
+  description = "Secrets Manager secret that holds the RDS master credentials. RDS creates it and encrypts it with the Secrets Manager KMS key."
+  value       = aws_db_instance.app.master_user_secret[0].secret_arn
+}
+
 output "create_db_secret_command" {
-  description = "The password is never committed, so the Secret is created from the shell."
-  value       = "kubectl create secret generic db -n csr-lab --from-literal=password='<the db_password you passed to terraform>'"
+  description = "Copy the password out of Secrets Manager into the Kubernetes Secret the Deployments already read. The password is not printed."
+  value       = "kubectl create secret generic db -n csr-lab --from-literal=password=\"$(aws secretsmanager get-secret-value --region ${var.aws_region} --secret-id ${aws_db_instance.app.master_user_secret[0].secret_arn} --query SecretString --output text | jq -r .password)\" --dry-run=client -o yaml | kubectl apply -f -"
 }
 
 output "product_load_test_hint" {
