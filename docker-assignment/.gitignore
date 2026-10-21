@@ -1,0 +1,9 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+tf/lab-key.pem
+scale/thresholds.env
+scale/state
+scale/pause
+crash.log
+**/target/

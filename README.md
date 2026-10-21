@@ -1,222 +1,80 @@
-# Cloud Scalability & Resilience Lab 
+# Docker scaling lab
 
-An AWS-based cloud-native laboratory for designing, deploying, load testing, scaling, breaking, observing, and evaluating a microservices system under controlled workload and failure conditions. 
+Two Spring Boot services run under Docker Compose on one EC2 instance. A resident script watches container CPU. When a service passes the peak measured on a single replica, the script adds replicas with `docker compose up --scale`.
 
-The project focuses on **scalability**, **resilience**, **observability**, **Infrastructure as Code(IaC)**, and **automated application delivery** using AWS, Terraform, Kubernetes, and k6.
+Grafana, Prometheus, and Tempo are the same boards used in the local compose stack. Terraform creates the instance and starts that stack.
 
+## What is running
 
-## Project Overview 
-This project is developed as part of the Cloud Scalability & Resilience Challenge. 
-The engineering workflow follows: 
-```
-Design -> Deploy -> Load Test -> Scale -> Break -> Observe -> Evaluate
-``` 
+`productservice` takes `POST /productapi/products`, looks up a coupon, and stores the discounted price. `couponservice` keeps the coupons and is only reachable on the Compose network. An nginx gateway publishes port 9090 and sends each request to a product replica.
 
-Rather than treating deployment as the final objective, the deployed system is treated as an **experimental environment**.
-The goal is to establish a measurable baseline, apply increasing workload, observe scaling behavior, introduce controlled failures, measure system degradation and recovery, and evalaute whether the architecture provides the expected scalability and resilience characteristics. 
+| Piece | Role |
+| --- | --- |
+| `productservice`, `couponservice` | One replica at start. Memory reservation 512MiB, limit 768MiB. |
+| `gateway` | Host port 9090. Resolves new replicas through the Compose DNS. |
+| `mysql` | Database `servicedb`. Not published off the instance. |
+| Grafana, Prometheus, Tempo | The local observability stack, on port 3000. |
+| `bin/scale-watch.sh` | systemd unit `scale-watch`. Idle until a baseline file exists. |
 
-## Assessment Deliverables 
-The project produces two primary deliverables. 
+The project tree is `docker-assignment/`.
 
-### Technical Report 
-The technical report documents: 
-- System architecture 
-- AWS infrastructure design 
-- Infrastructure as Code approach 
-- Container and Kubernetes deployment 
-- CI/CD and application delivery 
-- Scaling strategy 
-- Failure scenarios 
-- Observability strategy 
-- Experimental methodology 
-- Experimental results 
-- Resilience and scalability evaluation 
-- Engineering conclusions 
+## Create the instance
 
+From `docker-assignment/`:
 
-### Engineering Demonstration 
-A short engineering demonstration shows the system operating in AWS and demonstrates selected experiments. 
-
-The demonstration follows a representative scenario: 
-
-```
-Normal Workload -> Increased Traffic -> Resource Pressure -> Horizontal Scaling        -> Failure Injection -> System Degradation -> Recovery -> Observability -> Evalution  
+```bash
+terraform -chdir=tf init
+terraform -chdir=tf apply
 ```
 
-## Architecture 
-The system consists of a small Spring Boot microservices application deployed to Amazon EKS. The application is intentionally kept simple so that the primary focus remains on cloud scalability, resilience, deployment automation, and observability. 
+Apply builds a small VPC, a `t3.large` in `eu-west-1`, and a security group that allows SSH, Grafana, and port 9090 only from the machine that runs Terraform. User data installs Docker and the Compose plugin. A provisioner then copies this tree to `/opt/docker-assignment`, builds the images, starts Compose, and writes the coupons `SAVE10` and `SAVE20`.
 
+The SSH private key is written to `docker-assignment/tf/lab-key.pem`. It is not committed.
 
-// todo 
-
-### Infrastructure and Application Boundaries 
-The project separates infrastructure provisioning from application deployment. 
-
-**Terraform manages cloud infrastructure**: 
-- VPC
-- EKS 
-- ECR
-- RDS
-- IAM 
-- Networking 
-- Security 
-- Cloudwatch infrastructure
-
-### Kubernetes and Helm manage application workloads: 
-- Deployments
-- Services
-- Ingress / Load Balancer 
-- ConfigMaps 
-- Secrets 
-- Horizontal Pod Autoscaling 
-- Health Probes 
-
-
-### AWS CodePipeline and CodeBuild manage application delivery: 
-
-GitHub -> CodePipeline -> CodeBuild -> Docker Build -> Docker Hub -> ECR -> EKS 
-
-
-This provides a clear separation between: 
-
-> Infrastructure provisioning, application deployment, and application delivery.
-
-
-## Technology Stack 
-### Cloud 
-- AWS 
-- Amazon EKS 
-- Amazon ECR 
-- Amazon RDS 
-- AWS Load Balancer
-- AWS CloudWatch 
-
-
-
-### Infra 
-- Terraform 
-- Infrastructure as Code 
-- AWS networking 
-- AWS IAM
-- Security groups 
-
-### CI/CD 
-- GitHub 
-- AWS CodePipeline 
-- AWS CodeBuild 
-- Amazon ECR
-- Docker 
-
-### Application 
-- Java 
-- Spring Boot
-- REST APIs
-- Docker 
-
-### Container Platform 
-- Kubernetes 
-- Amazon EKS 
-- Helm 
-- Horizontal Pod Autoscaler 
-- Kubernetes health probes 
-
-### Testing
-- k6
-- Load testing 
-- Stress testing 
-- Traffic spike testing
-- Failure injection 
-- Recovery testing 
-
-
-### Observability 
-- Prometheus 
-- Grafana 
-- AWS CloudWatch
-- Applicaiton metrics 
-- Infrastructure metrics 
-- Logs 
-- Latenc 
-- Throughput 
-- Error rate 
-- CPU utilization 
-- Memory utilization 
-- Pod count
-- Restart count
-- Scaling events
-
-
-## Infrastructure as Code 
-Terraform is used as the primary infrastructure provisioning mechanism. The Objective is tomake the AWS environment reproducible, version-controlled, and independently deployable.  
-
-Terraform provisions the infrastructure required by the applicaiton. 
-
-### VPC 
-- VPC 
-- Public subnets 
-- Routing 
-- Security groups 
-- Networking components 
-
-
-### EKS 
-- EKS cluster 
-- Managed node groups 
-- IAM integration 
-- Kubernetes networking 
-
-
-### ECR
-- Container repositories
-- Image storage 
-
-
-### RDS
-- Application data store 
-- Database networking 
-- Database security 
-
-
-### Observability Infrastructure 
-- CloudWatch resources
-- Logging configuration 
-- Monitoring configuration where applicable
-- Tracing for services interactions and flows 
-
-
-## Application Deployment 
-The Spring Boot application consists of two lightweight microservices: 
-
-```
-API Services --> HTTP --> Worker Service
-```
-The application is intentionally simple. The complexity of the project comes from the deployment environment and experimental conditions, rather than from complex business logic. 
-
-The services provide controlled behavior that can be used to evaluate **scalability** and **resilience**. 
-
-Example include: 
-- Normal request processing 
-- Configurable processing latency 
-- Configurable CPU workload 
-- Controlled failure injection 
-- Health endpoints 
-- Application metrics & service inner instrumentation 
-
-This allows the same application to be used across multiple experiments. 
-
-
-## CI/CD 
-The application delivery pipeline integrates with GitHub with AWS CodePipeline. 
-
-```
-Developer --> GitHub --> CodePipeline --> CodeBuild {Compile && Unit Test && Docker Build && Push Image} --> ECR --> EKS --> Helm 
+```bash
+terraform -chdir=tf output
 ```
 
-The pipeline is responsible for application delivery rather than infrastructure provisioning. Terraform remains responsible for creating and maintaining AWS infrastructure. 
+Grafana is `http://<public-ip>:3000`. The boards are in the folder **CSR lab**. The product list is `http://<public-ip>:9090/productapi/products`. An empty list `[]` means the service is up and no product has been stored yet.
 
-Container images are versioned using the application build or Git commit identifier rather than relying exclusively on the `latest` tag. This allows experiments to be associated with a specific applicaiton version. 
+## Measure, then scale
 
+The scaler does not use a fixed guess. The first k6 run records the peak CPU of the single replica. Later runs scale when CPU goes above that peak.
 
+On the instance, start the sampler. It pauses scaling for 110 seconds:
 
+```bash
+ssh -i docker-assignment/tf/lab-key.pem ec2-user@<public-ip> \
+  '/opt/docker-assignment/bin/measure-baseline.sh'
+```
 
+While that window is open, from this machine:
 
+```bash
+docker-assignment/bin/k6-load.sh http://<public-ip>:9090
+```
+
+k6 needs to be installed locally. The script posts products for about 100 seconds and ramps to 20 virtual users, alternating `SAVE10` and `SAVE20`.
+
+The sampler writes `scale/thresholds.env` on the instance:
+
+```
+PRODUCT_CPU_PERCENT=<peak>
+COUPON_CPU_PERCENT=<peak>
+```
+
+`scale-watch` reads that file every 15 seconds.
+
+- Above the peak, it adds at most 2 replicas and stops at 4.
+- Below the peak for 120 seconds, it removes one replica and stops at 1.
+- If free memory cannot hold another 512MiB reservation, the extra replica is not started. That is the Compose counterpart of a Pod left `Pending`.
+
+Run the same k6 command again to cross the recorded peak. `docker compose ps` on the instance shows the new containers. Grafana shows the application metrics and traces.
+
+## Stop the instance
+
+```bash
+terraform -chdir=tf destroy
+```
+
+Destroy removes the VPC, the instance, and the key pair in AWS. The local key file remains on disk.
