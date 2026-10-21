@@ -1,0 +1,106 @@
+{
+  "uid": "csr-lab",
+  "title": "CSR lab",
+  "tags": ["csr-lab"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "refresh": "10s",
+  "time": { "from": "now-15m", "to": "now" },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "HTTP request rate",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (application, uri, method) (rate(http_server_requests_seconds_count[1m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Product POST p95",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "ms" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{application=\"productservice\",uri=\"/productapi/products\",method=\"POST\"}[1m]))) * 1000"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Coupon client p95",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "ms" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(coupon_client_request_duration_seconds_bucket{application=\"productservice\",operation=\"getCoupon\"}[1m]))) * 1000"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "MySQL save p95",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "ms" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(product_db_operation_duration_seconds_bucket{application=\"productservice\",operation=\"save\"}[1m]))) * 1000"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Coupon lookup p95",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "ms" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(coupon_lookup_duration_seconds_bucket{application=\"couponservice\",operation=\"findByCode\"}[1m]))) * 1000"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Product create outcomes",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (status) (rate(product_operation_total{operation=\"create\"}[1m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Downstream errors",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (exception) (rate(coupon_client_errors_total[1m]))"
+        },
+        {
+          "refId": "B",
+          "expr": "sum by (exception) (rate(coupon_lookup_errors_total[1m]))"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,221 @@
+# Install into namespace observability. The Service names below are fixed with
+# fullnameOverride, so the app ConfigMap can point at them.
+#
+#   helm dependency update deploy/helm/observability
+#   helm upgrade --install csr-lab-observability deploy/helm/observability \
+#     --namespace observability --create-namespace
+#
+# Grafana: kubectl -n observability port-forward svc/csr-lab-observability-grafana 3000:80
+# Login admin / admin. Dashboards are in the "CSR lab" folder.
+# Two t3.small nodes are tight. Requests below are sized for that cluster.
+
+appNamespace: csr-lab
+
+kube-prometheus-stack:
+  fullnameOverride: csr-lab-monitoring
+
+  # EKS does not expose these control-plane endpoints.
+  kubeEtcd:
+    enabled: false
+  kubeControllerManager:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+  kubeProxy:
+    enabled: false
+
+  alertmanager:
+    enabled: false
+
+  prometheusOperator:
+    resources:
+      requests:
+        cpu: 20m
+        memory: 64Mi
+      limits:
+        memory: 128Mi
+
+  kube-state-metrics:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 64Mi
+
+  prometheus-node-exporter:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 20Mi
+      limits:
+        memory: 40Mi
+
+  prometheus:
+    prometheusSpec:
+      retention: 6h
+      replicas: 1
+      enableRemoteWriteReceiver: true
+      enableFeatures:
+        - exemplar-storage
+      serviceMonitorNamespaceSelector:
+        matchNames:
+          - csr-lab
+          - observability
+      resources:
+        requests:
+          cpu: 100m
+          memory: 320Mi
+        limits:
+          memory: 512Mi
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 2000
+
+  grafana:
+    adminUser: admin
+    adminPassword: admin
+    defaultDashboardsEnabled: true
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
+    sidecar:
+      dashboards:
+        folderAnnotation: grafana_folder
+        provider:
+          foldersFromFilesStructure: true
+      datasources:
+        alertmanager:
+          enabled: false
+        exemplarTraceIdDestinations:
+          datasourceUid: tempo
+          traceIdLabelName: trace_id
+          urlDisplayLabel: View traces
+    additionalDataSources:
+      - name: Tempo
+        uid: tempo
+        type: tempo
+        access: proxy
+        editable: true
+        url: http://tempo.observability.svc:3200
+        jsonData:
+          nodeGraph:
+            enabled: true
+          serviceMap:
+            datasourceUid: prometheus
+          tracesToMetrics:
+            datasourceUid: prometheus
+            spanStartTimeShift: "-1m"
+            spanEndTimeShift: "1m"
+            tags:
+              - key: service.name
+                value: application
+          search:
+            hide: false
+
+# Single-binary Tempo. The upstream chart is marked deprecated; the distributed
+# chart is several deployments and does not fit two t3.small nodes.
+tempo:
+  fullnameOverride: tempo
+  tempo:
+    repository: grafana/tempo
+    tag: 2.10.8
+    reportingEnabled: false
+    memBallastSizeMbs: 32
+    metricsGenerator:
+      enabled: true
+      registry:
+        external_labels:
+          source: tempo
+      storage:
+        path: /var/tempo/generator/wal
+        remote_write:
+          - url: http://csr-lab-monitoring-prometheus.observability.svc:9090/api/v1/write
+            send_exemplars: true
+      traces_storage:
+        path: /var/tempo/generator/traces
+    overrides:
+      defaults:
+        metrics_generator:
+          processors:
+            - service-graphs
+            - span-metrics
+    resources:
+      requests:
+        cpu: 50m
+        memory: 192Mi
+      limits:
+        memory: 320Mi
+
+opentelemetry-collector:
+  fullnameOverride: otel-collector
+  mode: deployment
+  replicaCount: 1
+  image:
+    repository: otel/opentelemetry-collector
+    tag: "0.162.0"
+  command:
+    name: otelcol
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      memory: 128Mi
+  ports:
+    otlp:
+      enabled: true
+      containerPort: 4317
+      servicePort: 4317
+      hostPort: 0
+      protocol: TCP
+      appProtocol: grpc
+    otlp-http:
+      enabled: true
+      containerPort: 4318
+      servicePort: 4318
+      hostPort: 0
+      protocol: TCP
+    jaeger-compact:
+      enabled: false
+    jaeger-thrift:
+      enabled: false
+    jaeger-grpc:
+      enabled: false
+    zipkin:
+      enabled: false
+  # alternateConfig replaces the chart default when this chart is a dependency.
+  # The health_check extension is required by the chart probes.
+  alternateConfig:
+    extensions:
+      health_check:
+        endpoint: ${env:MY_POD_IP}:13133
+    processors:
+      batch: {}
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: ${env:MY_POD_IP}:4317
+          http:
+            endpoint: ${env:MY_POD_IP}:4318
+    exporters:
+      otlp:
+        endpoint: tempo.observability.svc:4317
+        tls:
+          insecure: true
+    service:
+      extensions:
+        - health_check
+      pipelines:
+        traces:
+          receivers:
+            - otlp
+          processors:
+            - batch
+          exporters:
+            - otlp

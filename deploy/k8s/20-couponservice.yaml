@@ -27,7 +27,7 @@ spec:
         - name: couponservice
           # The concrete commit tag the pipeline pushed, never latest, so one load
           # test maps to one image version.
-          image: 943208837077.dkr.ecr.eu-west-1.amazonaws.com/csr-lab-couponservice:3fec69c
+          image: 943208837077.dkr.ecr.eu-west-1.amazonaws.com/csr-lab-couponservice:9ac5a51
           ports:
             - name: http
               containerPort: 9091

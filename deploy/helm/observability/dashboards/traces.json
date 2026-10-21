@@ -1,0 +1,89 @@
+{
+  "uid": "csr-lab-traces",
+  "title": "CSR lab traces",
+  "tags": ["csr-lab", "tracing"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "refresh": "10s",
+  "time": { "from": "now-15m", "to": "now" },
+  "panels": [
+    {
+      "type": "nodeGraph",
+      "title": "Service graph",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 0 },
+      "datasource": { "type": "tempo", "uid": "tempo" },
+      "targets": [
+        {
+          "refId": "A",
+          "queryType": "serviceMap",
+          "query": "{ resource.service.name =~ \"productservice|couponservice\" }"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Span rate",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (service, span_name, span_kind) (rate(traces_spanmetrics_calls_total{span_name=~\"http post /productapi/products|http get /couponapi/coupons/\\\\{code\\\\}|http get\"}[1m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Span p95",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "ms" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (service, span_name, le) (rate(traces_spanmetrics_latency_bucket{span_name=~\"http post /productapi/products|http get /couponapi/coupons/\\\\{code\\\\}|http get\"}[1m]))) * 1000"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Product to coupon calls",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 18 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (client, server) (rate(traces_service_graph_request_total{client=\"productservice\",server=\"couponservice\"}[1m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Product to coupon p95",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 18 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "ms" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(traces_service_graph_request_client_seconds_bucket{client=\"productservice\",server=\"couponservice\"}[1m]))) * 1000"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error spans",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 18 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (service, span_name) (rate(traces_spanmetrics_calls_total{status_code=\"STATUS_CODE_ERROR\"}[1m]))"
+        }
+      ]
+    }
+  ]
+}

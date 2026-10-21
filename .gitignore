@@ -22,6 +22,9 @@ mvnw.cmd
 # Notes
 docs/
 
+# Helm dependency archives. Chart.lock pins the versions.
+deploy/helm/observability/charts/*.tgz
+
 # Terraform
 .terraform/
 *.tfstate
