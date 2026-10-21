@@ -18,9 +18,14 @@ output "spring_datasource_url" {
   value       = "jdbc:mysql://${aws_db_instance.app.endpoint}/${var.db_name}"
 }
 
-output "create_db_secret_command" {
-  description = "The password is never committed, so the Secret is created from the shell."
-  value       = "kubectl create secret generic db -n csr-lab --from-literal=password='<the db_password you passed to terraform>'"
+output "db_master_user_secret_arn" {
+  description = "Secret id the pods read at startup. Put this in DB_SECRET_ID. It is not the password."
+  value       = aws_db_instance.app.master_user_secret[0].secret_arn
+}
+
+output "db_secret_role_arn" {
+  description = "IAM role annotated on the productservice and couponservice service accounts."
+  value       = aws_iam_role.db_secret.arn
 }
 
 output "aws_region" {

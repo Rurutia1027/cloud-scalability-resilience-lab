@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: productservice
+  namespace: csr-lab
+  annotations:
+    # terraform -chdir=tf-eks output -raw db_secret_role_arn
+    eks.amazonaws.com/role-arn: arn:aws:iam::943208837077:role/csr-lab-db-secret
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: couponservice
+  namespace: csr-lab
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::943208837077:role/csr-lab-db-secret
