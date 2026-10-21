@@ -8,6 +8,11 @@ data:
   SPRING_DATASOURCE_URL: jdbc:mysql://csr-lab-mysql.c70eww46ijse.eu-west-1.rds.amazonaws.com:3306/servicedb
   SPRING_DATASOURCE_USERNAME: labadmin
 
+  # Pointer only, the same role as {VAULT:key} in idm-service. Not the password.
+  # terraform -chdir=tf-eks output -raw db_master_user_secret_arn
+  DB_SECRET_ID: REPLACE_WITH_SECRET_ARN
+  AWS_REGION: eu-west-1
+
   # Spring resolves the @Value("${couponService.url}") placeholder from COUPONSERVICE_URL.
   # COUPON_SERVICE_URL does not bind to it, because the underscores would make it coupon.service.url.
   COUPONSERVICE_URL: http://couponservice:9091/couponapi/coupons/
@@ -17,8 +22,3 @@ data:
   # collector is not up yet; the process still starts.
   MANAGEMENT_TRACING_ENABLED: "true"
   MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-collector.observability.svc:4318/v1/traces
----
-# The database password stays out of Git. Create the Secret from the shell once,
-# using the same value passed to Terraform as db_password:
-#
-#   kubectl create secret generic db -n csr-lab --from-literal=password='<db_password>'
